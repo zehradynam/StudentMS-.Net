@@ -11,11 +11,10 @@ var builder = WebApplication.CreateBuilder(args);
 //Allows Angular (localhost:4200) to call this API
 builder.Services.AddCors(options =>
 {
+   
     options.AddPolicy("AllowAngular", policy =>
     {
-        //policy.WithOrigins(http://localhost:4200)
-         policy.WithOrigins("https://famous-syrniki-ec8fd9.netlify.app/")
-
+        policy.WithOrigins("http://localhost:4200", "https://studentms-angular.pages.dev/", "https://famous-syrniki-ec8fd9.netlify.app")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -79,11 +78,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 var app = builder.Build();
 
 // -------------------- MIDDLEWARE --------------------
-if (app.Environment.IsDevelopment())
-{
+// if (app.Environment.IsDevelopment())
+// {
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+// }
 
 app.UseCors("AllowAngular");
 
