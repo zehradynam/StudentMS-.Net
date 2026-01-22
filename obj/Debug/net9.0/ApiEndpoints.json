@@ -133,5 +133,21 @@
       }
     ],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "StudentApi.Controllers.UserController",
+    "Method": "Signup",
+    "RelativePath": "api/User/signup",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "user",
+        "Type": "StudentApi.Models.User",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
   }
 ]

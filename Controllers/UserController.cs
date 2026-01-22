@@ -67,7 +67,7 @@ namespace StudentApi.Controllers
                 }),
                 Expires = DateTime.UtcNow.AddHours(1),           // Token expiration
                 SigningCredentials = new SigningCredentials(
-                    new SymmetricSecurityKey(key), 
+                    new SymmetricSecurityKey(key),
                     SecurityAlgorithms.HmacSha256Signature
                 )
             };
@@ -78,5 +78,45 @@ namespace StudentApi.Controllers
             return Ok(new { token = jwtToken }); // Return token to client
 
         }
+
+        [HttpPost("signup")]
+
+        public IActionResult Signup([FromBody] User user)
+
+        {
+
+             // 1. Basic validation
+    if (user == null || 
+        string.IsNullOrEmpty(user.Name) || 
+        string.IsNullOrEmpty(user.Email) || 
+        string.IsNullOrEmpty(user.Password))
+    {
+        return BadRequest("Name, Email, and Password are required.");
     }
+    // 2. Create new user with Teacher role
+    var newUser = new User
+    {
+        Name = user.Name.Trim(),
+        Email = user.Email.Trim().ToLower(),
+        Password = user.Password,  // Will add hashing in next step
+        Role = "Teacher"  // Always set as Teacher
+    };
+    // 3. Save to database
+    _context.Users.Add(newUser);
+    _context.SaveChanges();
+            return Ok(new
+            {
+                message = "Teacher registered successfully.",
+                userId = newUser.Id
+            });
+    
+
+        }
+
+
+
+    }
+
+
+
 }
