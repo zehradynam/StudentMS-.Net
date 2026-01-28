@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using StudentApi.Data;
 using StudentApi.Models;
-using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -44,6 +43,7 @@ namespace StudentApi.Controllers
             if (request == null || string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
                 return BadRequest("Email and Password are required.");
 
+
             // Check user in database
             var user = _context.Users
                 .FirstOrDefault(u => u.Email == request.Email && u.Password == request.Password);
@@ -60,7 +60,6 @@ namespace StudentApi.Controllers
                 Subject = new ClaimsIdentity(new[]
                 {
                     new Claim("Email", user.Email),
-                    new Claim("UserId", user.Id.ToString()),
 
                     new Claim(ClaimTypes.Role, user.Role)  // <-- Add this line
 
@@ -82,35 +81,44 @@ namespace StudentApi.Controllers
         [HttpPost("signup")]
 
         public IActionResult Signup([FromBody] User user)
-
         {
+            // 1. Basic validation
+            if (user == null ||
+                string.IsNullOrWhiteSpace(user.Name) ||
+                string.IsNullOrWhiteSpace(user.Email) ||
+                string.IsNullOrWhiteSpace(user.Password))
+            {
+                return BadRequest("Name, Email, and Password are required.");
+            }
 
-             // 1. Basic validation
-    if (user == null || 
-        string.IsNullOrEmpty(user.Name) || 
-        string.IsNullOrEmpty(user.Email) || 
-        string.IsNullOrEmpty(user.Password))
-    {
-        return BadRequest("Name, Email, and Password are required.");
-    }
-    // 2. Create new user with Teacher role
-    var newUser = new User
-    {
-        Name = user.Name.Trim(),
-        Email = user.Email.Trim().ToLower(),
-        Password = user.Password,  // Will add hashing in next step
-        Role = "Teacher"  // Always set as Teacher
-    };
-    // 3. Save to database
-    _context.Users.Add(newUser);
-    _context.SaveChanges();
+            string email = user.Email.Trim().ToLower();
+
+            // 2. Check if user already exists
+            bool userExists = _context.Users.Any(u => u.Email == email);
+            if (userExists)
+            {
+                Console.WriteLine($"User already exists with email: {email}");
+                return Conflict("User already exists.");
+            }
+
+            // 3. Create new user
+            var newUser = new User
+            {
+                Name = user.Name.Trim(),
+                Email = email,
+                Password = user.Password, // TODO: Hash password
+                Role = user.Role.ToLower()
+            };
+
+            // 4. Save to database
+            _context.Users.Add(newUser);
+            _context.SaveChanges();
+
             return Ok(new
             {
-                message = "Teacher registered successfully.",
-                userId = newUser.Id
+                message = "User registered successfully",
+                //userId = newUser.Id
             });
-    
-
         }
 
 

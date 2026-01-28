@@ -28,7 +28,7 @@ namespace StudentApi.Controllers
             return await _context.Students.ToListAsync();
         }
 
-        [Authorize(Roles = "Admin,Teacher")]
+        [Authorize(Roles = "Admin,teacher")]
         [HttpGet("{id}")]
         public async Task<ActionResult<Student>> GetStudent(int id)
         {
@@ -52,7 +52,7 @@ namespace StudentApi.Controllers
             return CreatedAtAction(nameof(GetStudent), new { id = student.Id }, student);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,teacher")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutStudent(int id, Student student)
         {
@@ -68,12 +68,12 @@ namespace StudentApi.Controllers
         }
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,teacher")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteStudent(int id)
         {
-           var student=await _context.Students.FindAsync(id);
-            if(student==null)
+            var student = await _context.Students.FindAsync(id);
+            if (student == null)
             {
                 return NotFound();
             }
